@@ -1,6 +1,16 @@
 module Netstomp
   class QDisc
 
+    attr_reader :qdisc
+
+    attr_reader :device
+
+    attr_reader :parent
+
+    attr_reader :handle
+
+    attr_reader :params
+
     def initialize(qdisc, device, parent, handle, params)
       @qdisc  = qdisc
       @device = device
@@ -24,6 +34,12 @@ module Netstomp
       execute(delete, opts[:noop])
     end
 
+    def identifier
+      id = "dev #{@device} #{@parent}"
+      id << " handle #{@handle}" if @handle
+      id
+    end
+
     private
 
     def execute(cmd, noop)
@@ -37,10 +53,5 @@ module Netstomp
       puts "execute: #{str}"
     end
 
-    def identifier
-      id = "dev #{@device} #{@parent}"
-      id << " handle #{@handle}" if @handle
-      id
-    end
   end
 end
