@@ -1,0 +1,115 @@
+#!/usr/bin/env ruby
+#
+# Emulate varying network failure modes
+#
+# @see man(8) tc
+# @see man(8) tc-netem
+
+require 'optparse'
+require 'benchmark'
+require 'netstomp'
+
+def apply_range(range, command, message, &block)
+  range.each do |i|
+    puts message % i
+    time = Benchmark.realtime do
+      puts "Executing command '#{command}'"
+      puts "---"
+      block.call(i)
+      puts "---"
+    end
+    puts "Command ran in %.2f seconds" % time
+  end
+end
+
+# @param specifier [Array]
+# @param command [String]
+# @param range [#each]
+def corrupt(specifier, command, range)
+  apply_range(range, command, "Corrupting %s percent of packets") do |i|
+    Netstomp::Netem.corrupt(*specifier, i).run(:noop => false) do
+      system(command)
+    end
+  end
+end
+
+# @param specifier [Array]
+# @param command [String]
+# @param range [#each]
+def duplicate(specifier, command, range)
+  apply_range(range, command, "Duplicating %s percent of packets") do |i|
+    Netstomp::Netem.duplicate(*specifier, i).run(:noop => false) do
+      system(command)
+    end
+  end
+end
+
+# @return [OptionParser]
+def parser(options)
+  options[:parent] = "root"
+  options[:handle] = nil
+
+  op = OptionParser.new do |opts|
+    opts.banner = "Usage: #{File.basename($0)} --device DEV --command CMD"
+
+    opts.on("-d", "--device DEV", "The device to stomp on") do |value|
+      options[:device] = value
+    end
+
+    opts.on("-c", "--corrupt VALUE", "Corrupt VALUE percent of packets - either a single value or comma delimited range") do |value|
+      options[:corrupt] = to_range(value)
+    end
+
+    opts.on("--duplicate VALUE", "Duplicate VALUE percent of packets - either a single value or comma delimited range") do |value|
+      options[:duplicate] = to_range(value)
+    end
+
+    opts.on("-h", "--help", "Print this help") do
+      puts opts
+      exit
+    end
+  end
+
+  op
+end
+
+def to_range(str)
+  case str
+  when /^\d+$/
+    range = (str..str)
+  when /^\d+,\d+$/
+    min, max = str.split(',')
+    range = (min..max)
+  else
+    raise ArgumentError, "Invalid range-ish value '#{str}'"
+  end
+end
+
+def parse(argv)
+  options = {}
+
+  op = parser(options)
+  command = op.parse(argv).join(" ")
+
+  if options[:device].nil?
+    puts "Device is nil"
+    puts op
+    exit(1)
+  end
+
+  [options, command]
+end
+
+def run(argv)
+  options, command = parse(argv)
+
+  specifier = [options[:device], "root", nil]
+
+  [:corrupt, :duplicate].each do |type|
+    if options.key?(type)
+      send(type, specifier, command, options[type])
+    end
+  end
+end
+
+run(ARGV)
