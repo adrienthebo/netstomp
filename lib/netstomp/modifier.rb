@@ -58,6 +58,8 @@ module Netstomp
   end
 
   require 'netstomp/modifier/corrupt'
+  require 'netstomp/modifier/loss'
+
   require 'netstomp/modifier/reset'
   require 'netstomp/modifier/drop'
 end

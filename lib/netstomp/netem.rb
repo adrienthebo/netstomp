@@ -15,8 +15,8 @@ module Netstomp
     end
 
     def self.loss(device, parent, handle, pct, correlation = nil)
-      params = "loss random #{pct}%"
-      params << " correlation #{correlation}%" if correlation
+      params = "loss #{pct}%"
+      params << " #{correlation}%" if correlation
       new(device, parent, handle, params)
     end
   end
