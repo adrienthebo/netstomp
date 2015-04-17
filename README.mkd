@@ -14,30 +14,14 @@ Usage
 -----
 
 ```
-netstomp --device [DEV]  [--corrupt MIN,MAX] -- command
+netstomp --device [DEV]  [--corrupt PCT] -- command
 ```
 
 Examples
 --------
 
 ```
-# netstomp --device eth0 --corrupt 5,15 -- ping -q -c 3 google.com
-Running with corruption level 5%
-Executing command 'ping -q -c 3 google.com'
-PING google.com (173.194.33.110) 56(84) bytes of data.
-
---- google.com ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2008ms
-rtt min/avg/max/mdev = 5.098/5.196/5.292/0.079 ms
-Command ran in 2.03 seconds
-Running with corruption level 6%
-Executing command 'ping -q -c 3 google.com'
-PING google.com (173.194.33.96) 56(84) bytes of data.
-
---- google.com ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2009ms
-rtt min/avg/max/mdev = 4.768/5.141/5.714/0.419 ms
-Command ran in 2.02 seconds
+# netstomp --device eth0 --corrupt 7 -- ping -q -c 3 google.com
 Running with corruption level 7%
 Executing command 'ping -q -c 3 google.com'
 PING google.com (173.194.33.97) 56(84) bytes of data.
@@ -46,13 +30,4 @@ PING google.com (173.194.33.97) 56(84) bytes of data.
 3 packets transmitted, 2 received, 33% packet loss, time 3002ms
 rtt min/avg/max/mdev = 5.227/5.279/5.332/0.089 ms
 Command ran in 3.01 seconds
-Running with corruption level 8%
-Executing command 'ping -q -c 3 google.com'
-PING google.com (173.194.33.98) 56(84) bytes of data.
-
---- google.com ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2009ms
-rtt min/avg/max/mdev = 5.502/5.880/6.098/0.275 ms
-Command ran in 2.02 seconds
-[...etc]
 ```
